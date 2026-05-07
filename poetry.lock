@@ -35,6 +35,21 @@ argon2 = ["argon2-cffi (>=23.1.0)"]
 bcrypt = ["bcrypt (>=4.1.1)"]
 
 [[package]]
+name = "django-htmx"
+version = "1.27.0"
+description = "Extensions for using Django with htmx."
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "django_htmx-1.27.0-py3-none-any.whl", hash = "sha256:13e1e13b87d39b57f95aae6e4987cb3df056d0b1373a41f4a94504a00298ffd8"},
+    {file = "django_htmx-1.27.0.tar.gz", hash = "sha256:036e5da801bfdf5f1ca815f21592cfb9f004a898f330c842f15e55c70e301a75"},
+]
+
+[package.dependencies]
+asgiref = ">=3.6"
+django = ">=4.2"
+
+[[package]]
 name = "sqlparse"
 version = "0.5.5"
 description = "A non-validating SQL parser."
@@ -63,4 +78,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "aba53cc693962481957f6acf40c4e8edf2966da21d3e3453e19e088521b92f63"
+content-hash = "3697ba3fe4fad2f1e8e194b244a343c16ab9fcd1aafde289ce635a5e8eac310b"

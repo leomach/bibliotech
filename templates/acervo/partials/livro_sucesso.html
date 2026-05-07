@@ -1,0 +1,13 @@
+{% include 'partials/messages.html' %}
+
+<div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+    <div>
+        <h4 class="alert-heading">✨ Cadastro Concluído!</h4>
+        <p>O livro <strong>{{ livro.titulo }}</strong> foi adicionado ao catálogo.</p>
+        <hr>
+        <div class="d-flex gap-2">
+            <a href="{% url 'cadastrar_livro' %}" class="btn btn-success btn-sm">Cadastrar Outro</a>
+            <a href="{% url 'lista_livros' %}" class="btn btn-primary btn-sm">Ver no Catálogo</a>
+        </div>
+    </div>
+</div>

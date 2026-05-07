@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Cadastrar Novo Livro</h4>
+            </div>
+            <div class="card-body" id="cadastro-container">
+                <form hx-post="{% url 'cadastrar_livro' %}" hx-target="#cadastro-container" hx-swap="innerHTML">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Título</label>
+                            {{ form.titulo }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Autor</label>
+                            {{ form.autor }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ISBN</label>
+                            {{ form.isbn }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoria</label>
+                            {{ form.categoria }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Biblioteca</label>
+                            {{ form.biblioteca }}
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'lista_livros' %}" class="btn btn-outline-secondary">Voltar ao Catálogo</a>
+                        <button type="submit" class="btn btn-success">Salvar Livro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

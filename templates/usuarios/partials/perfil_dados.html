@@ -1,0 +1,16 @@
+{% include 'partials/messages.html' %}
+
+<div id="perfil-container">
+    <p><strong>Nome:</strong> {{ usuario.nome }}</p>
+    <p><strong>Email:</strong> {{ usuario.email }}</p>
+    <p><strong>Papel:</strong> <span class="badge bg-info text-dark">{{ usuario.get_papel_display }}</span></p>
+    <p><strong>Biblioteca:</strong> {{ usuario.biblioteca.nome|default:"Acesso Global" }}</p>
+    <p><strong>Membro desde:</strong> {{ usuario.criado_em|date:"d/m/Y" }}</p>
+    
+    <button class="btn btn-primary btn-sm mt-3" 
+            hx-get="{% url 'perfil_editar' %}" 
+            hx-target="#perfil-container" 
+            hx-swap="outerHTML">
+        Editar Perfil
+    </button>
+</div>

@@ -1,0 +1,26 @@
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for livro in livros %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ livro.titulo }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ livro.autor }}</h6>
+                <p class="card-text">
+                    <small class="text-muted">ISBN: {{ livro.isbn }}</small><br>
+                    <small class="text-muted">Categoria: {{ livro.categoria }}</small><br>
+                    <small class="text-muted">Biblioteca: {{ livro.biblioteca.nome }}</small>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+                <span class="badge {% if livro.exemplares.filter.status == 'disponivel' %}bg-success{% else %}bg-warning{% endif %}">
+                    Exemplares: {{ livro.exemplares.count }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center text-muted">Nenhum livro encontrado.</p>
+    </div>
+    {% endfor %}
+</div>

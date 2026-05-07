@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Meu Perfil</h5>
+                <small>ID: {{ usuario.id }}</small>
+            </div>
+            <div class="card-body">
+                {% include 'usuarios/partials/perfil_dados.html' %}
+            </div>
+        </div>
+
+        {# Futura seção de Histórico #}
+        <div class="card mt-4">
+            <div class="card-header">Histórico de Empréstimos</div>
+            <div class="card-body">
+                <p class="text-muted text-center">Nenhum empréstimo registrado até o momento.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
