@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'lista_livros' %}">Acervo</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ livro.titulo }}</li>
+  </ol>
+</nav>
+
+<div class="row">
+    <!-- Coluna Lateral: Info do Livro -->
+    <div class="col-md-4">
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-book text-primary" style="font-size: 4rem;"></i>
+                <h3 class="card-title mt-3">{{ livro.titulo }}</h3>
+                <h5 class="text-muted">{{ livro.autor }}</h5>
+                <hr>
+                <div class="text-start">
+                    <p><strong>ISBN:</strong> {{ livro.isbn }}</p>
+                    <p><strong>Categoria:</strong> <span class="badge bg-light text-dark">{{ livro.categoria }}</span></p>
+                    <p><strong>Biblioteca:</strong> {{ livro.biblioteca.nome }}</p>
+                </div>
+            </div>
+            {% if user.is_bibliotecario or user.is_admin_system %}
+                {% if user.is_admin_system or user.biblioteca == livro.biblioteca %}
+                    <div class="card-footer bg-white border-top-0 d-grid">
+                        <a href="{% url 'gerenciar_exemplares' livro.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle"></i> Adicionar Exemplar
+                        </a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Fila de Espera -->
+        <div class="card {% if not has_disponivel %}border-warning{% endif %} shadow-sm mb-4">
+            <div class="card-body text-center">
+                {% if not has_disponivel %}
+                    <p class="text-warning mb-2 fw-bold"><i class="bi bi-exclamation-triangle"></i> Indisponível no momento</p>
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'entrar_fila' livro.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning w-100 mb-3">
+                                <i class="bi bi-people"></i> Entrar na Fila de Espera
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <p class="text-success mb-2 fw-bold"><i class="bi bi-check-circle"></i> Disponível para retirada</p>
+                {% endif %}
+                
+                <h5 class="mb-0">Fila de Espera</h5>
+                <p class="text-muted small mb-3">{{ fila_espera.count }} pessoas aguardando</p>
+
+                {% if user.is_bibliotecario or user.is_admin_system %}
+                    <div class="text-start">
+                        <ul class="list-group list-group-flush">
+                            {% for reserva in fila_espera %}
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center bg-transparent">
+                                <div>
+                                    <div class="fw-bold small">{{ reserva.posicao }}º - {{ reserva.usuario.nome|default:reserva.usuario.username }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">{{ reserva.usuario.email }}</div>
+                                </div>
+                                <form action="{% url 'remover_da_fila' reserva.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link text-danger p-0" title="Remover da fila">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna Principal: Lista de Exemplares -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Unidades Físicas</h4>
+            <span class="badge bg-secondary rounded-pill">{{ exemplares.count }} total</span>
+        </div>
+
+        <div class="row g-3">
+            {% for exemplar in exemplares %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-3 me-3">
+                                <i class="bi bi-upc-scan text-secondary fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Código: <code>{{ exemplar.codigo_barras }}</code></h6>
+                                <span class="badge 
+                                    {% if exemplar.status == 'disponivel' %}bg-success
+                                    {% elif exemplar.status == 'emprestado' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ exemplar.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            {% if user.is_authenticated %}
+                                {% if exemplar.status == 'disponivel' %}
+                                    {% if user.is_bibliotecario or user.is_admin_system %}
+                                        {% if user.is_admin_system or user.biblioteca == livro.biblioteca %}
+                                            <button type="button" class="btn btn-success btn-sm px-3" data-bs-toggle="modal" data-bs-target="#loanModal{{ exemplar.id }}">
+                                                <i class="bi bi-person-plus"></i> Emprestar
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <form action="{% url 'solicitar_emprestimo' exemplar.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-primary btn-sm px-3">
+                                                <i class="bi bi-send"></i> Solicitar Pedido
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% elif exemplar.status == 'emprestado' %}
+                                    {% if user.is_bibliotecario or user.is_admin_system %}
+                                        <a href="{% url 'lista_emprestimos' %}" class="btn btn-outline-info btn-sm px-3">
+                                            <i class="bi bi-eye"></i> Ver Status
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted">Indisponível</span>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if user.is_bibliotecario or user.is_admin_system %}
+                                    {% if user.is_admin_system or user.biblioteca == livro.biblioteca %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            Gestão
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li><a class="dropdown-item" href="{% url 'editar_exemplar' exemplar.pk %}"><i class="bi bi-pencil"></i> Editar Código</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Alterar Status</h6></li>
+                                            {% for val, label in exemplar.STATUS_CHOICES %}
+                                            <li>
+                                                <form action="{% url 'atualizar_status_exemplar' exemplar.pk %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="{{ val }}">
+                                                    <button type="submit" class="dropdown-item {% if exemplar.status == val %}active{% endif %}">{{ label }}</button>
+                                                </form>
+                                            </li>
+                                            {% endfor %}
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="{% url 'excluir_exemplar' exemplar.pk %}"><i class="bi bi-trash"></i> Remover Unidade</a></li>
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login para solicitar</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Modal de Empréstimo Direto (Balcão) -->
+                    {% if exemplar.status == 'disponivel' and user.is_bibliotecario %}
+                    <div class="modal fade" id="loanModal{{ exemplar.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title">Realizar Empréstimo Direto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form action="{% url 'realizar_emprestimo' exemplar.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-body py-4">
+                                        <div class="alert alert-info border-0">
+                                            <p class="mb-0 small">Use esta opção para registrar um empréstimo realizado fisicamente no balcão.</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">E-mail do Usuário</label>
+                                            <input type="email" name="usuario_email" class="form-control" placeholder="aluno@email.com" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0 pt-0">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Confirmar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light text-center py-5 shadow-sm border-0">
+                    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                    <p class="text-muted mb-0">Nenhuma unidade física cadastrada para este livro.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

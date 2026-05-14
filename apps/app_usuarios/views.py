@@ -19,6 +19,8 @@ class RegistroView(CreateView):
 
 @login_required
 def perfil_view(request):
+    if request.htmx:
+        return render(request, 'usuarios/partials/perfil_dados.html', {'usuario': request.user})
     return render(request, 'usuarios/perfil.html', {'usuario': request.user})
 
 @login_required

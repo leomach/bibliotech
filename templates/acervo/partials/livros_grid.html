@@ -1,26 +1,35 @@
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for livro in livros %}
     <div class="col">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm border-0">
             <div class="card-body">
-                <h5 class="card-title">{{ livro.titulo }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ livro.autor }}</h6>
-                <p class="card-text">
-                    <small class="text-muted">ISBN: {{ livro.isbn }}</small><br>
-                    <small class="text-muted">Categoria: {{ livro.categoria }}</small><br>
-                    <small class="text-muted">Biblioteca: {{ livro.biblioteca.nome }}</small>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ livro.titulo }}</h5>
+                    <span class="badge bg-light text-dark border">{{ livro.categoria }}</span>
+                </div>
+                <h6 class="card-subtitle mb-3 text-muted">{{ livro.autor }}</h6>
+                <p class="card-text small mb-1 text-secondary">
+                    <i class="bi bi-upc-scan"></i> ISBN: {{ livro.isbn }}
+                </p>
+                <p class="card-text small text-secondary">
+                    <i class="bi bi-geo-alt"></i> {{ livro.biblioteca.nome }}
                 </p>
             </div>
-            <div class="card-footer bg-transparent border-top-0">
-                <span class="badge {% if livro.exemplares.filter.status == 'disponivel' %}bg-success{% else %}bg-warning{% endif %}">
-                    Exemplares: {{ livro.exemplares.count }}
+            <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center pb-3">
+                <span class="badge bg-info text-dark">
+                    {{ livro.exemplares.count }} exemplares
                 </span>
+                <a href="{% url 'detalhe_livro' livro.pk %}" class="btn btn-sm btn-primary">
+                    Ver Detalhes
+                </a>
             </div>
         </div>
     </div>
     {% empty %}
     <div class="col-12">
-        <p class="text-center text-muted">Nenhum livro encontrado.</p>
+        <div class="alert alert-info text-center" role="alert">
+            <i class="bi bi-search"></i> Nenhum livro encontrado com esses filtros.
+        </div>
     </div>
     {% endfor %}
 </div>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0">Editar Exemplar</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Editando exemplar do livro: <strong>{{ exemplar.livro.titulo }}</strong></p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Código de Barras</label>
+                        {{ form.codigo_barras }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status Atual</label>
+                        {{ form.status }}
+                    </div>
+                    
+                    <!-- Campo livro oculto -->
+                    <div style="display:none;">
+                        {{ form.livro }}
+                    </div>
+                    
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'detalhe_livro' exemplar.livro.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

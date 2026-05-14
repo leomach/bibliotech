@@ -4,25 +4,67 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Catálogo de Livros</h2>
     {% if user.is_bibliotecario or user.is_admin_system %}
-        <a href="{% url 'cadastrar_livro' %}" class="btn btn-success">Cadastrar Livro</a>
+        <a href="{% url 'cadastrar_livro' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Cadastrar Livro
+        </a>
     {% endif %}
 </div>
 
-<div class="mb-4">
-    <input type="text" 
-           name="q" 
-           class="form-control" 
-           placeholder="Buscar por título, autor ou ISBN..." 
-           hx-get="{% url 'lista_livros' %}" 
-           hx-trigger="keyup changed delay:500ms" 
-           hx-target="#livros-grid" 
-           hx-indicator=".htmx-indicator">
-    <div class="htmx-indicator spinner-border spinner-border-sm text-primary mt-2" role="status">
-        <span class="visually-hidden">Carregando...</span>
+<div class="card mb-4">
+    <div class="card-body">
+        <form hx-get="{% url 'lista_livros' %}" hx-target="#livros-grid" hx-trigger="change, keyup delay:500ms from:input[name='q']" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Busca Geral</label>
+                <input type="text" 
+                       name="q" 
+                       class="form-control" 
+                       placeholder="Título, autor ou ISBN..." 
+                       value="{{ request.GET.q }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Categoria</label>
+                <select name="categoria" class="form-select">
+                    <option value="">Todas</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat }}" {% if request.GET.categoria == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Biblioteca</label>
+                <select name="biblioteca" class="form-select">
+                    <option value="">Todas as Unidades</option>
+                    {% for bib in bibliotecas %}
+                    <option value="{{ bib.id }}" {% if request.GET.biblioteca == bib.id|stringformat:"s" %}selected{% endif %}>{{ bib.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+        <div class="htmx-indicator spinner-border spinner-border-sm text-primary mt-2" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
     </div>
 </div>
 
 <div id="livros-grid">
     {% include 'acervo/partials/livros_grid.html' %}
 </div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.biblioteca %}&biblioteca={{ request.GET.biblioteca }}{% endif %}">Anterior</a>
+      </li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.biblioteca %}&biblioteca={{ request.GET.biblioteca }}{% endif %}">Próxima</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
 {% endblock %}

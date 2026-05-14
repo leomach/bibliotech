@@ -1,6 +1,6 @@
-{% include 'partials/messages.html' %}
-
 <div id="perfil-container">
+    {% include 'partials/messages.html' %}
+    
     <p><strong>Nome:</strong> {{ usuario.nome }}</p>
     <p><strong>Email:</strong> {{ usuario.email }}</p>
     <p><strong>Papel:</strong> <span class="badge bg-info text-dark">{{ usuario.get_papel_display }}</span></p>

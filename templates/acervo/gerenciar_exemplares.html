@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Adicionar Exemplar</h4>
+            </div>
+            <div class="card-body">
+                <p>Livro: <strong>{{ livro.titulo }}</strong></p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Código de Barras</label>
+                        {{ form.codigo_barras }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status Inicial</label>
+                        {{ form.status }}
+                    </div>
+                    <!-- Campo livro está oculto ou desabilitado pois já sabemos qual é -->
+                    <div style="display:none;">
+                        {{ form.livro }}
+                    </div>
+                    
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'detalhe_livro' livro.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Salvar Exemplar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

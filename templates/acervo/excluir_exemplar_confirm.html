@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Confirmar Exclusão</h4>
+            </div>
+            <div class="card-body">
+                <p>Você tem certeza que deseja excluir o exemplar com código de barras <strong>{{ exemplar.codigo_barras }}</strong>?</p>
+                <p class="text-muted small">Esta ação não pode ser desfeita e removerá o exemplar do acervo permanentemente.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'detalhe_livro' exemplar.livro.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">Excluir Permanentemente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

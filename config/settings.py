@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'app_bibliotecas',
     'app_usuarios',
     'app_acervo',
+    'app_emprestimos',
 ]
 
 AUTH_USER_MODEL = 'app_usuarios.Usuario'

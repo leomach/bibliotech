@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{% if user.is_bibliotecario %}Gerenciar Empréstimos e Pedidos{% else %}Minhas Solicitações e Empréstimos{% endif %}</h2>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        {% if user.is_bibliotecario %}<th>Usuário</th>{% endif %}
+                        <th>Livro</th>
+                        <th>Cód. Barras</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emprestimo in emprestimos %}
+                    <tr>
+                        {% if user.is_bibliotecario %}
+                        <td>
+                            <strong>{{ emprestimo.usuario.nome }}</strong><br>
+                            <small class="text-muted">{{ emprestimo.usuario.email }}</small>
+                        </td>
+                        {% endif %}
+                        <td>{{ emprestimo.exemplar.livro.titulo }}</td>
+                        <td><code>{{ emprestimo.exemplar.codigo_barras }}</code></td>
+                        <td>
+                            {% if emprestimo.status == 'pendente' %}
+                                <small>Pedido em: {{ emprestimo.data_emprestimo|date:"d/m/Y" }}</small>
+                            {% else %}
+                                {{ emprestimo.data_emprestimo|date:"d/m/Y" }}<br>
+                                <small class="text-muted">Prazo: {{ emprestimo.data_prazo|date:"d/m/Y" }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if emprestimo.status == 'pendente' %}bg-warning text-dark
+                                {% elif emprestimo.status == 'ativo' %}bg-primary
+                                {% elif emprestimo.status == 'devolvido' %}bg-success
+                                {% else %}bg-danger{% endif %}">
+                                {{ emprestimo.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.is_bibliotecario or user.is_admin_system %}
+                                {% if emprestimo.status == 'pendente' %}
+                                    <form action="{% url 'validar_emprestimo' emprestimo.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" name="acao" value="aprovar" class="btn btn-sm btn-success">
+                                            <i class="bi bi-check-lg"></i> Validar
+                                        </button>
+                                        <button type="submit" name="acao" value="rejeitar" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x-lg"></i> Rejeitar
+                                        </button>
+                                    </form>
+                                {% elif emprestimo.status == 'ativo' %}
+                                    <form action="{% url 'registrar_devolucao' emprestimo.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-return-left"></i> Devolver
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                {% if emprestimo.status == 'pendente' %}
+                                    <span class="text-muted small">Aguardando bibliotecário...</span>
+                                {% elif emprestimo.status == 'ativo' %}
+                                    <span class="text-primary small">Em posse do livro</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            Nenhuma atividade encontrada.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

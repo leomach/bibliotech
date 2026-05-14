@@ -24,4 +24,5 @@ urlpatterns = [
     path('usuarios/', include('app_usuarios.urls')),
     path('acervo/', include('app_acervo.urls')),
     path('bibliotecas/', include('app_bibliotecas.urls')),
+    path('emprestimos/', include('app_emprestimos.urls')),
 ]
