@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'app_usuarios',
     'app_acervo',
     'app_emprestimos',
+    'app_notificacoes',
 ]
 
 AUTH_USER_MODEL = 'app_usuarios.Usuario'
@@ -62,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+    'app_notificacoes.middleware.VerificaPrazosMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -76,6 +78,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app_notificacoes.context_processors.notificacoes_context',
             ],
         },
     },

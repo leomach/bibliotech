@@ -24,6 +24,17 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     {% if user.is_authenticated %}
+                        <li class="nav-item me-3">
+                            <a class="nav-link position-relative py-1" href="{% url 'notificacoes:lista' %}">
+                                <i class="bi bi-bell fs-5"></i>
+                                {% if notificacoes_nao_lidas > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.25em 0.4em;">
+                                        {{ notificacoes_nao_lidas }}
+                                        <span class="visually-hidden">notificações não lidas</span>
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'lista_livros' %}">Acervo</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'lista_emprestimos' %}">Empréstimos</a></li>
                         

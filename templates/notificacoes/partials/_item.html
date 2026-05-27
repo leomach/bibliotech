@@ -1,0 +1,35 @@
+<div class="list-group-item list-group-item-action {% if not notificacao.lida %}border-start border-4 border-primary{% endif %}" id="notif-{{ notificacao.id }}">
+    <div class="d-flex w-100 justify-content-between align-items-center">
+        <div class="pe-3">
+            <h6 class="mb-1 d-flex align-items-center">
+                {% if notificacao.tipo == 'emprestimo_aprovado' %}
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                {% elif notificacao.tipo == 'emprestimo_rejeitado' %}
+                    <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                {% elif notificacao.tipo == 'livro_disponivel' %}
+                    <i class="bi bi-bookmark-star-fill text-info me-2"></i>
+                {% elif notificacao.tipo == 'prazo_proximo' %}
+                    <i class="bi bi-clock-fill text-warning me-2"></i>
+                {% elif notificacao.tipo == 'emprestimo_atrasado' %}
+                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                {% elif notificacao.tipo == 'devolucao_registrada' %}
+                    <i class="bi bi-arrow-return-left text-success me-2"></i>
+                {% else %}
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                {% endif %}
+                {{ notificacao.get_tipo_display }}
+            </h6>
+            <p class="mb-1 text-dark">{{ notificacao.mensagem|safe }}</p>
+            <small class="text-muted">{{ notificacao.criada_em|date:"d/m/Y H:i" }}</small>
+        </div>
+        
+        {% if not notificacao.lida %}
+            <button class="btn btn-sm btn-outline-secondary" 
+                    hx-post="{% url 'notificacoes:marcar_lida' notificacao.id %}"
+                    hx-target="#notif-{{ notificacao.id }}"
+                    hx-swap="outerHTML">
+                Marcar como lida
+            </button>
+        {% endif %}
+    </div>
+</div>
