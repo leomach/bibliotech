@@ -3,14 +3,30 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">Login</div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">Login</div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" class="form-control {% if field.errors %}is-invalid{% endif %}" required id="{{ field.auto_id }}">
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                     <button type="submit" class="btn btn-primary w-100">Entrar</button>
                 </form>
+                <div class="text-center mt-3">
+                    <a href="{% url 'password_reset' %}" class="text-decoration-none">Esqueceu a senha?</a>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                Não tem uma conta? <a href="{% url 'registro' %}" class="text-decoration-none">Registre-se</a>
             </div>
         </div>
     </div>

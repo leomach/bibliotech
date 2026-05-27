@@ -10,6 +10,26 @@ body {
 }
 
 .card {
-    margin-top: 2rem;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Espaçamento extra no container principal */
+#main-content {
+    min-height: calc(100vh - 200px);
+    padding-bottom: 5rem;
+}
+
+/* Forçar a limpeza de floats ou fluxos estranhos na paginação */
+nav[aria-label="Navegação do acervo"], 
+nav[aria-label="Navegação de usuários"] {
+    clear: both;
+    display: block;
+    width: 100%;
+    margin-top: 3rem !important;
+    position: relative;
+    z-index: 10;
+}
+
+.pagination {
+    margin-bottom: 0;
 }
