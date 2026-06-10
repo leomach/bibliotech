@@ -5,12 +5,12 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Emprestimo, FilaEspera
 from app_acervo.models import Livro, Exemplar
-from app_notificacoes.services import criar_notificacao
+from . import signals as emp_signals
 
 @login_required
 def solicitar_emprestimo(request, exemplar_id):
     exemplar = get_object_or_404(Exemplar, id=exemplar_id)
-    
+
     if exemplar.status != 'disponivel':
         messages.error(request, "Este exemplar não está disponível para solicitação.")
         return redirect('detalhe_livro', pk=exemplar.livro.pk)
@@ -30,7 +30,7 @@ def solicitar_emprestimo(request, exemplar_id):
                 exemplar=exemplar,
                 status='pendente'
             )
-            exemplar.status = 'emprestado' 
+            exemplar.status = 'emprestado'
             exemplar.save()
             messages.success(request, f"Solicitação de '{exemplar.livro.titulo}' enviada!")
     except Exception as e:
@@ -53,32 +53,28 @@ def validar_emprestimo(request, emprestimo_id):
                     emprestimo.status = 'ativo'
                     emprestimo.data_emprestimo = timezone.now().date()
                     emprestimo.save()
-                    
-                    # Notificação 1: Empréstimo Aprovado
-                    criar_notificacao(
-                        usuario=emprestimo.usuario,
-                        tipo='emprestimo_aprovado',
-                        mensagem=f"Seu empréstimo de **{emprestimo.exemplar.livro.titulo}** foi aprovado. Devolva até {emprestimo.data_prazo.strftime('%d/%m/%Y')}."
+                    emp_signals.emprestimo_aprovado.send(
+                        sender=Emprestimo,
+                        emprestimo=emprestimo,
                     )
-                    
-                    messages.success(request, f"Empréstimo validado!")
+                    messages.success(request, "Empréstimo validado!")
+
                 elif acao == 'rejeitar':
                     exemplar = emprestimo.exemplar
+                    titulo_livro = exemplar.livro.titulo
+                    usuario = emprestimo.usuario
                     exemplar.status = 'disponivel'
                     exemplar.save()
-                    
-                    # Notificação 2: Empréstimo Rejeitado
-                    criar_notificacao(
-                        usuario=emprestimo.usuario,
-                        tipo='emprestimo_rejeitado',
-                        mensagem=f"Seu pedido de empréstimo de **{exemplar.livro.titulo}** foi recusado."
-                    )
-                    
                     emprestimo.delete()
+                    emp_signals.emprestimo_rejeitado.send(
+                        sender=Emprestimo,
+                        usuario=usuario,
+                        titulo_livro=titulo_livro,
+                    )
                     messages.info(request, "Solicitação rejeitada.")
         except Exception as e:
             messages.error(request, f"Erro: {str(e)}")
-            
+
     return redirect('lista_emprestimos')
 
 @login_required
@@ -92,7 +88,6 @@ def remover_da_fila(request, fila_id):
     try:
         with transaction.atomic():
             reserva.delete()
-            # Reordenar fila
             restante = FilaEspera.objects.filter(livro_id=livro_pk).order_by('posicao')
             for i, item in enumerate(restante):
                 item.posicao = i + 1
@@ -100,7 +95,7 @@ def remover_da_fila(request, fila_id):
             messages.success(request, "Usuário removido da fila.")
     except Exception as e:
         messages.error(request, f"Erro: {str(e)}")
-    
+
     return redirect('detalhe_livro', pk=livro_pk)
 
 @login_required
@@ -119,9 +114,10 @@ def realizar_emprestimo(request, exemplar_id):
             Emprestimo.objects.create(usuario=usuario_alvo, exemplar=exemplar, status='ativo')
             exemplar.status = 'emprestado'
             exemplar.save()
-            messages.success(request, f"Empréstimo realizado!")
+            messages.success(request, "Empréstimo realizado!")
     except Exception as e:
         messages.error(request, f"Erro: {str(e)}")
+
     return redirect('detalhe_livro', pk=exemplar.livro.pk)
 
 @login_required
@@ -136,45 +132,42 @@ def registrar_devolucao(request, emprestimo_id):
             emprestimo.data_devolucao = timezone.now().date()
             emprestimo.save()
             exemplar = emprestimo.exemplar
+            titulo_livro = exemplar.livro.titulo
             exemplar.status = 'disponivel'
             exemplar.save()
-            
-            # Notificação 7: Devolução registrada
-            criar_notificacao(
-                usuario=emprestimo.usuario,
-                tipo='devolucao_registrada',
-                mensagem=f"Devolução de **{exemplar.livro.titulo}** registrada. Obrigado!"
+
+            emp_signals.devolucao_registrada.send(
+                sender=Emprestimo,
+                emprestimo=emprestimo,
+                titulo_livro=titulo_livro,
             )
-            
-            messages.success(request, f"Devolução registrada.")
-            
-            # Gerenciar Fila de Espera
+            messages.success(request, "Devolução registrada.")
+
             fila = FilaEspera.objects.filter(livro=exemplar.livro).order_by('posicao')
             proximo = fila.first()
             if proximo:
-                # Notificação 4: Livro disponível para o primeiro da fila
-                criar_notificacao(
+                emp_signals.livro_disponivel_fila.send(
+                    sender=FilaEspera,
                     usuario=proximo.usuario,
-                    tipo='livro_disponivel',
-                    mensagem=f"**{exemplar.livro.titulo}** está disponível! Solicite seu empréstimo em breve."
+                    titulo_livro=titulo_livro,
                 )
-                
                 messages.info(request, f"Próximo na fila: {proximo.usuario.nome}.")
                 proximo.delete()
-                
-                # Notificação 3: Outros avançaram na fila
+
                 restante = FilaEspera.objects.filter(livro=exemplar.livro).order_by('posicao')
                 for i, item in enumerate(restante):
                     item.posicao = i + 1
                     item.save()
-                    criar_notificacao(
+                    emp_signals.fila_avancou.send(
+                        sender=FilaEspera,
                         usuario=item.usuario,
-                        tipo='fila_avanco',
-                        mensagem=f"Você avançou na fila de **{exemplar.livro.titulo}**. Posição atual: {item.posicao}."
+                        titulo_livro=titulo_livro,
+                        nova_posicao=item.posicao,
                     )
-                    
+
     except Exception as e:
         messages.error(request, f"Erro: {str(e)}")
+
     return redirect('lista_emprestimos')
 
 @login_required

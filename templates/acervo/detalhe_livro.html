@@ -165,7 +165,7 @@
                     </div>
 
                     <!-- Modal de Empréstimo Direto (Balcão) -->
-                    {% if exemplar.status == 'disponivel' and user.is_bibliotecario %}
+                    {% if exemplar.status == 'disponivel' and (user.is_bibliotecario or user.is_admin_system) %}
                     <div class="modal fade" id="loanModal{{ exemplar.id }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
