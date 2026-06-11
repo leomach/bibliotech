@@ -10,4 +10,12 @@
         <a class="btn btn-primary btn-lg" href="{% url 'registro' %}" role="button">Começar Agora</a>
     {% endif %}
 </div>
+{% url 'recomendacoes_para_voce' as url_recomendacoes_home %}
+{% if user.is_authenticated and url_recomendacoes_home %}
+<div class="mt-5"
+     hx-get="{{ url_recomendacoes_home }}"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+</div>
+{% endif %}
 {% endblock %}

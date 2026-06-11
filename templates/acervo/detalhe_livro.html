@@ -165,7 +165,7 @@
                     </div>
 
                     <!-- Modal de Empréstimo Direto (Balcão) -->
-                    {% if exemplar.status == 'disponivel' and (user.is_bibliotecario or user.is_admin_system) %}
+                    {% if exemplar.status == 'disponivel' %}{% if user.is_bibliotecario or user.is_admin_system %}
                     <div class="modal fade" id="loanModal{{ exemplar.id }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -192,7 +192,7 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
+                    {% endif %}{% endif %}
                 </div>
             </div>
             {% empty %}
@@ -206,4 +206,17 @@
         </div>
     </div>
 </div>
+
+{% url 'recomendacoes_livro' livro.pk as url_recomendacoes %}
+{% if user.is_authenticated and url_recomendacoes %}
+<div class="mt-5"
+     hx-get="{{ url_recomendacoes }}"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+    <div class="text-center text-muted py-3">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span class="ms-2 small">Carregando recomendações...</span>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

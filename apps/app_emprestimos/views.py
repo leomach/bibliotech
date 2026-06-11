@@ -105,6 +105,9 @@ def realizar_emprestimo(request, exemplar_id):
         messages.error(request, "Acesso negado.")
         return redirect('detalhe_livro', pk=exemplar.livro.pk)
 
+    if request.method != 'POST':
+        return redirect('detalhe_livro', pk=exemplar.livro.pk)
+
     usuario_email = request.POST.get('usuario_email')
     from app_usuarios.models import Usuario
     try:

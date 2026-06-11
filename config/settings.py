@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'app_acervo',
     'app_emprestimos',
     'app_notificacoes',
+    'app_recomendacoes',
 ]
 
 AUTH_USER_MODEL = 'app_usuarios.Usuario'

@@ -10,4 +10,5 @@ urlpatterns = [
     path('bibliotecas/', include('app_bibliotecas.urls')),
     path('emprestimos/', include('app_emprestimos.urls')),
     path('notificacoes/', include('app_notificacoes.urls', namespace='notificacoes')),
+    path('recomendacoes/', include('app_recomendacoes.urls')),
 ]
